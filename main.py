@@ -142,3 +142,4 @@ def explain_rule(keyword: str):
     if not info:
         return {"message": "해당 룰 설명을 찾을 수 없습니다."}
     return info
+# trigger deployment
