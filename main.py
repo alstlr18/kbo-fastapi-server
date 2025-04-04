@@ -11,7 +11,7 @@ def get_recent_games(team_name: str) -> List[str]:
     res = requests.get(url)
     res.encoding = 'utf-8'
     soup = BeautifulSoup(res.text, "html.parser")
-    
+
     game_rows = soup.select("table tbody tr")[:10]
     results = []
 
@@ -23,6 +23,24 @@ def get_recent_games(team_name: str) -> List[str]:
             score = cols[2].text.strip()
             result = cols[3].text.strip()
             results.append(f"{date} - {opponent}전 결과: {score} ({result})")
+    return results
+
+# 오늘 경기 선발투수 (간단 대체 버전 - 네이버 모바일)
+def get_today_pitchers():
+    url = "https://m.sports.naver.com/kbaseball/record/index"
+    res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+    res.encoding = 'utf-8'
+    soup = BeautifulSoup(res.text, "html.parser")
+
+    results = []
+    matches = soup.select(".Home_match__item")
+    for match in matches:
+        try:
+            title = match.select_one(".Home_match__title").text.strip()
+            info = match.select_one(".Home_match__info").text.strip()
+            results.append({"경기": title, "정보": info})
+        except:
+            continue
     return results
 
 # 투타 통산 상대전적
@@ -86,6 +104,10 @@ rule_explanations = {
 @app.get("/recent-games/{team_name}")
 def recent_games(team_name: str):
     return {"team": team_name, "recent_games": get_recent_games(team_name)}
+
+@app.get("/today-games")
+def today_games():
+    return {"today_games": get_today_pitchers()}
 
 @app.get("/vs-record")
 def vs_record(pitcher: str, batter: str):
