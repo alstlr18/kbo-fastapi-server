@@ -30,7 +30,7 @@ def get_recent_games(team_name: str) -> List[str]:
     return results
 
 # 오늘 경기 선발 및 라인업 (Selenium)
-def get_naver_pitchers_lineup() -> List[dict]:
+# def get_naver_pitchers_lineup() -> List[dict]:
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
@@ -128,7 +128,7 @@ rule_explanations = {
 def recent_games(team_name: str):
     return {"team": team_name, "recent_games": get_recent_games(team_name)}
 
-@app.get("/today-games")
+# @app.get("/today-games")
 def today_games():
     return {"today_games": get_naver_pitchers_lineup()}
 
