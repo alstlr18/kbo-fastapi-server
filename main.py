@@ -2,10 +2,6 @@ from fastapi import FastAPI
 from typing import List
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-import time
 
 app = FastAPI()
 
@@ -27,43 +23,6 @@ def get_recent_games(team_name: str) -> List[str]:
             score = cols[2].text.strip()
             result = cols[3].text.strip()
             results.append(f"{date} - {opponent}전 결과: {score} ({result})")
-    return results
-
-# 오늘 경기 선발 및 라인업 (Selenium)
-# def get_naver_pitchers_lineup() -> List[dict]:
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(options=options)
-
-    url = "https://sports.news.naver.com/kbaseball/schedule/index"
-    driver.get(url)
-    time.sleep(3)
-
-    results = []
-    try:
-        games = driver.find_elements(By.CSS_SELECTOR, ".sch_tb tbody tr")
-        for game in games:
-            try:
-                teams = game.find_elements(By.CSS_SELECTOR, ".tm span")
-                time_info = game.find_element(By.CLASS_NAME, "td_hour").text.strip()
-                pitcher_info = game.find_element(By.CLASS_NAME, "td_pitcher").text.strip()
-                
-                if len(teams) >= 2:
-                    team1 = teams[0].text.strip()
-                    team2 = teams[1].text.strip()
-
-                    results.append({
-                        "time": time_info,
-                        "match": f"{team1} vs {team2}",
-                        "pitchers": pitcher_info
-                    })
-            except:
-                continue
-    finally:
-        driver.quit()
-
     return results
 
 # 투타 통산 상대전적
@@ -128,10 +87,6 @@ rule_explanations = {
 def recent_games(team_name: str):
     return {"team": team_name, "recent_games": get_recent_games(team_name)}
 
-# @app.get("/today-games")
-def today_games():
-    return {"today_games": get_naver_pitchers_lineup()}
-
 @app.get("/vs-record")
 def vs_record(pitcher: str, batter: str):
     return get_pitcher_vs_batter(pitcher, batter)
@@ -142,4 +97,3 @@ def explain_rule(keyword: str):
     if not info:
         return {"message": "해당 룰 설명을 찾을 수 없습니다."}
     return info
-# trigger deployment
